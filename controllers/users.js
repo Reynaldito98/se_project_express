@@ -1,28 +1,28 @@
 const User = require('../models/user');
+const error = require('../utils/errors')
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then(users => res.send({ data: users }))
     .catch((e) => {
-      if(e.name === "ValidationError"){
-        res.status(400).send({message: e.message})
-      } else {
-        res.status(500).send({message: e.message})
-      }
+      res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
     });
 };
 
 module.exports.getUser = (req, res) => {
-  const { _id } = req.body;
+  const { userId } = req.params;
 
-  User.findById(_id)
+  User.findById(userId)
     .orFail()
     .then(user => res.send({data: user}))
     .catch((e) => {
       if(e.name === "ValidationError"){
-        res.status(400).send({message: e.message})
-      } else {
-        res.status(500).send({message: e.message})
+        res.status(error.BAD_REQUEST).send({message: "Invalid data"})
+      } else if(e.name === "DocumentNotFoundError ") {
+        res.status(error.NOT_FOUND).send({message: "Document not found"})
+      }
+      else {
+        res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
       }
     });
 }
@@ -34,9 +34,12 @@ module.exports.createUser = (req, res) => {
     .then(users => res.send({ data: users }))
     .catch((e) => {
       if(e.name === "ValidationError"){
-        res.status(400).send({message: e.message})
-      } else {
-        res.status(500).send({message: e.message})
+        res.status(error.BAD_REQUEST).send({message: "Invalid data"})
+      } else if(e.name === "DocumentNotFoundError ") {
+        res.status(error.NOT_FOUND).send({message: "Document not found"})
+      }
+      else {
+        res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
       }
     });
 };
