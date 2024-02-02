@@ -3,9 +3,8 @@ const error = require('../utils/errors');
 
 module.exports.getClothingItems = (req, res) => {
   ClothingItem.find({})
-    .populate('user')
     .then(items => res.status(200).send({ data: items }))
-    .catch((e) => {
+    .catch(() => {
       res.status(error.DEFAULT).send({message:  "An error has occurred on the server."});
     });
 };
@@ -19,10 +18,7 @@ module.exports.createClothingItem = (req, res) => {
     .catch((e) => {
       if(e.name === "ValidationError"){
         res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-      } else if(e.name === "DocumentNotFoundError ") {
-        res.status(error.NOT_FOUND).send({message: "Document not found"})
-      }
-      else {
+      } else {
         res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
       }
     });
@@ -33,9 +29,9 @@ module.exports.deleteClothingItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId).orFail().then((item) => res.status(200).send({data: item}))
   .catch((e) => {
-    if(e.name === "ValidationError"){
+    if(e.name === "CastError"){
       res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-    } else if(e.name === "DocumentNotFoundError ") {
+    } else if(e.name === "DocumentNotFoundError") {
       res.status(error.NOT_FOUND).send({message: "Document not found"})
     }
     else {
@@ -52,7 +48,7 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 .catch((e) => {
   if(e.name === "CastError"){
     res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-  } else if(e.name === "DocumentNotFoundError ") {
+  } else if(e.name === "DocumentNotFoundError") {
     res.status(error.NOT_FOUND).send({message: "Document not found"})
   }
   else {
@@ -68,7 +64,7 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 .catch((e) => {
   if(e.name === "CastError"){
     res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-  } else if(e.name === "DocumentNotFoundError ") {
+  } else if(e.name === "DocumentNotFoundError") {
     res.status(error.NOT_FOUND).send({message: "Document not found"})
   }
   else {

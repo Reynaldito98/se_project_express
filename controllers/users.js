@@ -4,7 +4,7 @@ const error = require('../utils/errors')
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then(users => res.send({ data: users }))
-    .catch((e) => {
+    .catch(() => {
       res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
     });
 };
@@ -16,9 +16,9 @@ module.exports.getUser = (req, res) => {
     .orFail()
     .then(user => res.send({data: user}))
     .catch((e) => {
-      if(e.name === "ValidationError"){
+      if(e.name === "CastError"){
         res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-      } else if(e.name === "DocumentNotFoundError ") {
+      } else if(e.name === "DocumentNotFoundError") {
         res.status(error.NOT_FOUND).send({message: "Document not found"})
       }
       else {
@@ -35,10 +35,7 @@ module.exports.createUser = (req, res) => {
     .catch((e) => {
       if(e.name === "ValidationError"){
         res.status(error.BAD_REQUEST).send({message: "Invalid data"})
-      } else if(e.name === "DocumentNotFoundError ") {
-        res.status(error.NOT_FOUND).send({message: "Document not found"})
-      }
-      else {
+      } else {
         res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
       }
     });
