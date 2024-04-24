@@ -27,7 +27,13 @@ module.exports.createClothingItem = (req, res) => {
 module.exports.deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId).orFail().then((item) => res.status(200).send({data: item}))
+  ClothingItem.findByIdAndDelete(itemId).orFail().then((item) => {
+    if(req.user._id === req.owner._id) {
+        res.status(200).send({data: item})
+    } else {
+        res.status(403).send({message: "Not allowed to delete this item"})
+    }
+  })
   .catch((e) => {
     if(e.name === "CastError"){
       res.status(error.BAD_REQUEST).send({message: "Invalid data"})
