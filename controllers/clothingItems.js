@@ -27,12 +27,11 @@ module.exports.createClothingItem = (req, res) => {
 module.exports.deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId).orFail().then((item) => {
-    if(req.user._id === req.owner._id) {
-        res.status(200).send({data: item})
-    } else {
-        res.status(403).send({message: "Not allowed to delete this item"})
+  ClothingItem.findById(itemId).orFail().then((item) => {
+    if(String(item.owner) === req.user._id) {
+        return item.deleteOne().then(() => res.send({message: 'Item deleted'}))
     }
+    return res.status(error.FORBIDDEN).send({message: "You are not allowed to delete this item"})
   })
   .catch((e) => {
     if(e.name === "CastError"){
