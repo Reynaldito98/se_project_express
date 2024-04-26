@@ -23,10 +23,10 @@ module.exports.getCurrentUser = (req, res) => {
 }
 
 module.exports.updateProfile = (req, res) => {
-  const { userId} = req.params;
+  const {_id} = req.user;
   const {name, avatar} = req.body;
 
-  User.findByIdAndUpdate(userId, {name, avatar}, {new: true, runValidators: true})
+  User.findByIdAndUpdate(_id, {name, avatar}, {new: true, runValidators: true})
     .orFail()
     .then(user => res.send({data: user}))
     .catch((e) => {
@@ -45,9 +45,12 @@ module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   bcrypt.hash(password, 10)
-    .then(() => User.create({ name, avatar, email }))
-    .then(users => res.send({ data: users }))
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then(users => res.send({name: users.name, avatar: users.avatar, email: users.email}))
     .catch((e) => {
+      if(e.code===11000) {
+        res.status(error.DOUBLE_EMAIL).send({message: "There is a duplicate email"})
+      }
       if(e.name === "ValidationError"){
         res.status(error.BAD_REQUEST).send({message: "Invalid data"})
       } else {
