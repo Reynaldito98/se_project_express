@@ -66,6 +66,10 @@ module.exports.login = (req, res) => {
     .then((user) => {
       res.send({
         token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
+        email: email,
+        name: user.name,
+        avatar: user.avatar,
+        _id: user._id
       });
     })
     .catch((err) => {

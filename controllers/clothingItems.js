@@ -3,7 +3,7 @@ const error = require('../utils/errors');
 
 module.exports.getClothingItems = (req, res) => {
   ClothingItem.find({})
-    .then(items => res.status(200).send({ data: items }))
+    .then(item => res.status(200).send(item))
     .catch(() => {
       res.status(error.DEFAULT).send({message:  "An error has occurred on the server."});
     });
@@ -14,7 +14,7 @@ module.exports.createClothingItem = (req, res) => {
   const userId  = req.user._id;
 
   ClothingItem.create({ name, weather, imageUrl, owner: userId})
-    .then(item => res.send({ data: item }))
+    .then(item => res.send(item))
     .catch((e) => {
       if(e.name === "ValidationError"){
         res.status(error.BAD_REQUEST).send({message: "Invalid data"})
