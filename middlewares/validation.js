@@ -63,6 +63,8 @@ module.exports.validateUpdateUser = celebrate(
   }
 )
 
+
+//There is no name field specified as required in this validation.
 module.exports.authentication = celebrate(
   {
     body: Joi.object().keys({
