@@ -28,9 +28,9 @@ app.get('/crash-test', () => {
 
 app.use(routes);
 
-app.use(errorLogger);
-
 app.use(errors());
+
+app.use(errorLogger);
 
 app.use(errorHandler);
 
