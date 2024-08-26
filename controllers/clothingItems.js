@@ -1,6 +1,6 @@
 const BadRequestError = require('../errors/bad-request-error');
-const UnauthorizedError = require('../errors/unauthorized-error');
 const NotFoundError = require('../errors/not-found-err');
+const ForbiddenError = require('../errors/forbidden-error');
 const ClothingItem = require('../models/clothingItem');
 
 module.exports.getClothingItems = (req, res, next) => {
@@ -39,7 +39,7 @@ module.exports.deleteClothingItem = (req, res, next) => {
     if(String(item.owner) === req.user._id) {
         return item.deleteOne().then(() => res.send({message: 'Item deleted'}))
     }
-    throw new UnauthorizedError('Access denied');
+    throw new ForbiddenError('Access denied');
   })
   .catch((e) => {
     if(e.name === "CastError"){

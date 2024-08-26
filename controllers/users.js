@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const {JWT_SECRET} = require('../utils/config');
 const BadRequestError = require('../errors/bad-request-error');
-const ForbiddenError = require('../errors/forbidden-error');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-error');
+const UnauthorizedError = require('../errors/unauthorized-error')
 
 module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
@@ -81,7 +81,11 @@ module.exports.login = (req, res, next) => {
         _id: user._id
       });
     })
-    .catch(() => {
-      next(new ForbiddenError('Access denied'));
+    .catch((err) => {
+      if (err.message === "Incorrect email or password") {
+        next(new UnauthorizedError('Access denied'))
+     } else {
+        next(err);
+      }
     });
 };
