@@ -82,7 +82,7 @@ module.exports.login = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.message === "Incorrect email or password") {
+      if (err.message === "Incorrect password or email") {
         next(new UnauthorizedError('Access denied'))
      } else {
         next(err);

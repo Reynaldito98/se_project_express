@@ -37,8 +37,12 @@ module.exports.validateUserBody = celebrate(
         'string.empty': 'The "imageUrl" field must be filled in',
         'string.uri': 'the "imageUrl" field must be a valid url',
       }),
-      email: Joi.string().required().email(),
-      password: Joi.string().required()
+      email: Joi.string().required().email().messages({
+        "string.empty": 'The "email" field is required',
+      }),
+      password: Joi.string().required().messages({
+        "string.empty": 'The "password" field is required',
+      }),
     })
   }
 )
