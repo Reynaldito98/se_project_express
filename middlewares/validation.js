@@ -62,9 +62,13 @@ module.exports.validateUpdateUser = celebrate(
 module.exports.authentication = celebrate(
   {
     body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required()
-    })
+      email: Joi.string().required().email().messages({
+        "string.empty": 'The "email" field is required',
+      }),
+      password: Joi.string().required().messages({
+        "string.empty": 'The "password" field is required',
+      }),
+    }),
   }
 )
 

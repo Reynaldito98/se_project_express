@@ -5,11 +5,12 @@ const user = require('./user');
 const { authentication, validateUserBody } = require('../middlewares/validation');
 const NotFoundError = require('../errors/not-found-err');
 
-
-router.use('/users', user);
-router.use('/items', clothingItem);
+// COULD YOU HELP ME FIGURE OUT WHAT THE PROBLEM MIGHT BE. THANKS
 router.post('/signin', authentication, login);
 router.post('/signup', validateUserBody, createUser);
+router.use('/users', user);
+router.use('/items', clothingItem);
+
 
 
 router.use(() => {
