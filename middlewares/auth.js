@@ -1,11 +1,9 @@
 const jwt = require('jsonwebtoken');
 const {JWT_SECRET} = require('../utils/config');
-const error = require('../utils/errors');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
-const handleAuthError = (res) => {
-  res
-    .status(error.UNAUTHORIZED)
-    .send({ message: 'Authorization Error' });
+const handleAuthError = () => {
+  throw new UnauthorizedError('Permission denied');
 };
 
 const extractBearerToken = (header) => header.replace('Bearer ', '')
@@ -14,7 +12,7 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res);
+    return handleAuthError();
   }
 
   const token = extractBearerToken(authorization);

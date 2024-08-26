@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const error = require('../utils/errors');
 const {JWT_SECRET} = require('../utils/config');
+const BadRequestError = require('../errors/bad-request-error');
+const ForbiddenError = require('../errors/forbidden-error');
+const NotFoundError = require('../errors/not-found-err');
+const ConflictError = require('../errors/conflict-error');
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById(_id)
@@ -12,36 +15,42 @@ module.exports.getCurrentUser = (req, res) => {
     .then(user => res.send({data: user}))
     .catch((e) => {
       if(e.name === "CastError"){
-        res.status(error.BAD_REQUEST).send({message: "Invalid data"})
+        next(new BadRequestError('The ID string is invalid'));
       } else if(e.name === "DocumentNotFoundError") {
-        res.status(error.NOT_FOUND).send({message: "Document not found"})
+        next(new NotFoundError('No user matching ID found'));
       }
       else {
-        res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
+        next(e);
       }
     });
 }
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const {_id} = req.user;
   const {name, avatar} = req.body;
 
   User.findByIdAndUpdate(_id, {name, avatar}, {new: true, runValidators: true})
     .orFail()
-    .then(user => res.send({data: user}))
+    .then(user => {
+        if(!user) {
+          throw new NotFoundError('No user matching ID found');
+        }
+
+        res.send({data: user})
+      })
     .catch((e) => {
       if(e.name === "ValidationError"){
-        res.status(error.BAD_REQUEST).send({message: "Invalid data"})
+        next(new BadRequestError('The ID string is invalid'));
       } else if(e.name === "DocumentNotFoundError") {
-        res.status(error.NOT_FOUND).send({message: "Document not found"})
+        next(new NotFoundError('No user matching ID found'));
       }
       else {
-        res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
+        next(e);
       }
     });
 }
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   bcrypt.hash(password, 10)
@@ -49,26 +58,30 @@ module.exports.createUser = (req, res) => {
     .then(users => res.send({name: users.name, avatar: users.avatar, email: users.email}))
     .catch((e) => {
       if(e.code===11000) {
-        res.status(error.DOUBLE_EMAIL).send({message: "There is a duplicate email"})
+        next(new ConflictError('There is a duplicate email'));
       }
       if(e.name === "ValidationError"){
-        res.status(error.BAD_REQUEST).send({message: "Invalid data"})
+        next(new BadRequestError('The ID string is invalid'));
       } else {
-        res.status(error.DEFAULT).send({message:  "An error has occurred on the server."})
+        next(e);
       }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
         token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
+        email,
+        name: user.name,
+        avatar: user.avatar,
+        _id: user._id
       });
     })
-    .catch((err) => {
-      res.status(error.UNAUTHORIZED).send({ message: err.message });
+    .catch(() => {
+      next(new ForbiddenError('Access denied'));
     });
 };
